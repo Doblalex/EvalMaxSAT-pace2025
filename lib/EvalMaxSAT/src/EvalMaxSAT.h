@@ -415,6 +415,7 @@ public:
 		//std::cout << "o " << solutionCost << std::endl;
 
 		int resultLastSolve;
+		std::vector<int> lastcoresizes;
 		for (;;) {
 			MonPrint("Full SAT...");
 			assert(_cardToAdd.size() == 0);
@@ -467,11 +468,30 @@ public:
 						unsigned int nbSolve = 0;
 						unsigned int lastImprove = 0;
 						double bestP = std::numeric_limits<double>::max();
+
 						if (_multiSolveStrategy && (conflict.size() > 3)) {
 							Chrono C;
-							while ((nbSolve < 3 * lastImprove) || (nbSolve < 20)
-									|| ((C.tacSec() < 0.1 * maxLastSolveOr1 * getTimeRefCoef())
-											&& (nbSolve < 1000))) {
+							int minlastcoresizes = std::numeric_limits<int>::max();
+							for (auto i = (int)lastcoresizes.size() - 1;
+									i >= std::max(0, (int)lastcoresizes.size() - 3); i--) {
+								minlastcoresizes = std::min(minlastcoresizes, (int)lastcoresizes[i]);
+
+								if (i != (int)lastcoresizes.size() - 1
+										&& lastcoresizes[i] != lastcoresizes[i + 1]) {
+									minlastcoresizes = 0;
+								}
+							}
+							if (lastcoresizes.size() == std::numeric_limits<int>::max()) {
+								minlastcoresizes = 0;
+							}
+
+							// adaptation: if the the last 3 core sizes are the same, and we get the same core size, we can probably break the following loop earlier.
+
+							while (conflict.size() > 3
+									&& ((nbSolve < 3 * lastImprove) || (nbSolve < 20)
+											|| ((C.tacSec() < 0.1 * maxLastSolveOr1 * getTimeRefCoef())
+													&& (nbSolve < 1000)
+													&& bestP != minlastcoresizes))) {
 								nbSolve++;
 
 								auto tmp = solver->getConflict(assum);
@@ -519,6 +539,8 @@ public:
 						if (conflict.size() == 0) {
 							return solutionCost != std::numeric_limits<t_weight>::max();
 						}
+
+						lastcoresizes.push_back(conflict.size());
 
 						// 3. replace assum by card
 						long long minWeight = std::numeric_limits<long long>::max();
