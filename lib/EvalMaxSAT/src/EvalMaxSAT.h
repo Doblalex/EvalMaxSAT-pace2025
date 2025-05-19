@@ -473,7 +473,7 @@ public:
 							Chrono C;
 							int minlastcoresizes = std::numeric_limits<int>::max();
 							for (auto i = (int)lastcoresizes.size() - 1;
-									i >= std::max(0, (int)lastcoresizes.size() - 3); i--) {
+									i >= std::max(0, (int)lastcoresizes.size() - 10); i--) {
 								minlastcoresizes = std::min(minlastcoresizes, (int)lastcoresizes[i]);
 
 								if (i != (int)lastcoresizes.size() - 1
