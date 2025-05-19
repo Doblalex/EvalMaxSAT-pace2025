@@ -99,6 +99,7 @@ class EvalMaxSAT {
 	///////////////////////////
 	/// Representation of the MaxSAT formula
 	///
+public:
 	SAT_SOLVER* solver = nullptr;
 	WeightVector _poids; // _poids[lit] = weight of lit
 	std::map<t_weight, std::set<int>> _mapWeight2Assum; // _mapWeight2Assum[weight] = set of literals with this weight
